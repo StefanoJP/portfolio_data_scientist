@@ -12,7 +12,7 @@ library(tidyverse)
 library(leaflet)
 library(caret)
 # Importing the dataset
-dataset = read.csv('/Users/sakanashishunsuke/OneDrive - Asia Pacific University/AML/dataset/listings_test.csv')
+dataset = read.csv('listings_test.csv')
 #check number of rows and columns
 dim(dataset)
 

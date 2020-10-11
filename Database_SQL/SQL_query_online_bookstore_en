@@ -1,0 +1,224 @@
+#the design of online bookstore
+#create the publisher table
+CREATE TABLE PUBLISHER
+    (PUB_ID CHAR(6) PRIMARY KEY,
+    PUB_NAME VARCHAR(100) NOT NULL,
+    PUB_STREET VARCHAR(40) NOT NULL,
+    PUB_CITY VARCHAR(40) NOT NULL,
+    PUB_COUNTRY VARCHAR(40) NOT NULL,
+    PUB_PHONE_NO VARCHAR(20) NOT NULL,
+    PUB_POSTCODE VARCHAR(10),
+    PUB_EMAIL_ADDRESS VARCHAR(40),
+    PUB_WEBSITE_NAME VARCHAR(100)
+    )
+
+#create the booklist table
+CREATE TABLE BOOKLIST
+    (BL_ID CHAR(7) PRIMARY KEY,
+    BL_BOOK_AUTHOR VARCHAR(100) NOT NULL,
+    BL_BOOK_TITLE VARCHAR(100) NOT NULL,
+    BL_BOOK_GENRE VARCHAR(50) NOT NULL,
+    BL_BOOK_PRICE NUMERIC(7,2) NOT NULL,
+    BL_BOOK_STOCK NUMERIC(4,0) NOT NULL
+    )  
+
+#create the manager table
+CREATE TABLE MANAGER
+    (MAN_ID CHAR(5) PRIMARY KEY,
+    MAN_F_NAME VARCHAR(50) NOT NULL,
+    MAN_L_NAME VARCHAR(50) NOT NULL,
+    MAN_STREET VARCHAR(40) NOT NULL,
+    MAN_CITY VARCHAR(40) NOT NULL,
+    MAN_COUNTRY VARCHAR(40) NOT NULL,
+    MAN_PHONE_NO VARCHAR(20) NOT NULL,
+    MAN_POSTCODE VARCHAR(10),
+    MAN_EMAIL_ADDRESS VARCHAR(40) NOT NULL
+    )
+
+#create the ordered book table
+CREATE TABLE ORDER_BOOK
+    (OB_ID CHAR(6) PRIMARY KEY,
+    MAN_ID CHAR(5) REFERENCES MANAGER(MAN_ID),
+    PUB_ID CHAR(6) REFERENCES PUBLISHER(PUB_ID),
+    OB_TITLE VARCHAR(100) NOT NULL,
+    OB_QUANTITY NUMERIC(4,0) NOT NULL,
+    OB_SHIPPING_DATE DATE NOT NULL,
+    OB_PAYMENT_AMOUNT NUMERIC(7,2) NOT NULL,
+    OB_SHIPPING_STREET VARCHAR(40) NOT NULL,
+    OB_SHIPPING_CITY VARCHAR(40) NOT NULL,
+    OB_SHIPPING_COUNTRY VARCHAR(40) NOT NULL,
+    OB_SHIPPING_POSTCODE VARCHAR(10) NOT NULL
+    )
+
+#create the invoice table
+CREATE TABLE INVOICE
+    (INV_ID CHAR(8) PRIMARY KEY,
+    MAN_ID CHAR(5) REFERENCES MANAGER(MAN_ID),
+    PUB_ID CHAR(6) REFERENCES PUBLISHER(PUB_ID),
+    INV_DATE DATE NOT NULL,
+    INV_QUANTITY NUMERIC(4,0) NOT NULL,
+    INV_PAYMENT_AMOUNT NUMERIC(7,2) NOT NULL)
+
+#create the book lists table
+CREATE TABLE BOOK
+    (BOOK_ID CHAR(6) PRIMARY KEY,
+    BOOK_EDITION CHAR(8) NOT NULL,
+    BOOK_TITLE VARCHAR(100) NOT NULL,
+    BOOK_PRICE NUMERIC(7,2) NOT NULL,
+    BOOK_GENRE VARCHAR(50) NOT NULL,
+    BOOK_AUTHOR VARCHAR(100) NOT NULL,
+    BOOK_PUBLISHER VARCHAR(100) NOT NULL,
+    BOOK_STOCK NUMERIC(4,0),
+    BOOK_REVIEW VARCHAR(100),
+    BOOK_DT_PURCHASED DATE
+    )
+
+#create the genre table
+CREATE TABLE GENRE
+    (GENRE_ID CHAR(5) PRIMARY KEY,
+    GENRE_NAME CHAR(30) NOT NULL
+    )  
+
+#create the customer table
+CREATE TABLE CUSTOMER
+    (CUS_ID CHAR(7) PRIMARY KEY,
+    CUS_F_NAME VARCHAR(50) NOT NULL,
+    CUS_L_NAME VARCHAR(50) NOT NULL,
+    CUS_GENDER VARCHAR(6) NOT NULL,
+    CUS_STREET VARCHAR(40) NOT NULL,
+    CUS_CITY VARCHAR(40) NOT NULL,
+    CUS_COUNTRY VARCHAR(40) NOT NULL,
+    CUS_PHONE_NO VARCHAR(20) NOT NULL,
+    CUS_POSTCODE VARCHAR(10),
+    CUS_EMAIL_ADDRESS VARCHAR(40) NOT NULL
+    )
+
+#create the feedback table
+CREATE TABLE FEEDBACK
+    (FB_ID CHAR(7) PRIMARY KEY,
+    BOOK_ID CHAR(6) REFERENCES BOOK(BOOK_ID),
+    CUS_ID CHAR(7) REFERENCES CUSTOMER(CUS_ID),
+    FB_SCORE TINYINT NOT NULL,
+    FB_OPINION VARCHAR(50)
+    )
+
+#create the shopping cart table
+CREATE TABLE SHOPPING_CART
+    (SC_ID CHAR(6) PRIMARY KEY,
+    CUS_ID CHAR(7) REFERENCES CUSTOMER(CUS_ID),
+    SC_QUANTITY NUMERIC(3,0) NOT NULL,
+    SC_COST NUMERIC(7,2) NOT NULL,
+    SC_STREET VARCHAR(40) NOT NULL,
+    SC_CITY VARCHAR(40) NOT NULL,
+    SC_COUNTRY VARCHAR(40) NOT NULL,
+    SC_POSTCODE VARCHAR(10) NOT NULL,
+    SC_PAYMENT_METHOD VARCHAR(20) NOT NULL,
+    ) 
+
+#create the receipt table
+CREATE TABLE RECEIPT
+    (REC_ID CHAR(5) PRIMARY KEY,
+    SC_ID CHAR(6) REFERENCES SHOPPING_CART(SC_ID),
+    CUS_ID CHAR(7) REFERENCES CUSTOMER(CUS_ID)
+    ) 
+
+#create the collected book table
+CREATE TABLE COLLECT_BOOK
+    (BOOK_ID CHAR(6) REFERENCES BOOK(BOOK_ID),
+    CUS_ID CHAR(7) REFERENCES CUSTOMER(CUS_ID)
+    )  
+
+#create the book list in shopping cart table
+CREATE TABLE SHOPPING_CART_BOOK
+    (SC_ID CHAR(6) REFERENCES SHOPPING_CART(SC_ID),
+    BOOK_ID CHAR(6) REFERENCES BOOK(BOOK_ID),
+    SCB_STATUS CHAR(15) NOT NULL
+    )  
+
+#Find the total number of feedback per book. Show book id, book title, and total number of feedback per book.
+
+SELECT b.book_id AS 'Book ID', MAX(b.book_title) AS 'Book Title',
+count(*) AS 'Total number of feedback' 
+    FROM book b 
+    INNER JOIN feedback f ON b.book_id = f.book_id 
+    GROUP BY b.book_id
+    
+#Find the total number of feedback per member. Show member id, member name, and total number of feedback per member.
+
+SELECT c.cus_id AS 'Member ID', MAX(c.cus_f_name) AS 'First Name', 
+MAX(c.cus_l_name) AS 'Last Name',
+    count(*) AS 'Total number of feedback' 
+    FROM customer c
+    INNER JOIN feedback f ON c.cus_id = f.cus_id
+    GROUP BY c.cus_id
+
+#Find the total number of book published by each publisher. Show publisher id, publisher name, and number of book published.
+
+SELECT MAX(p.pub_id) AS 'Publisher ID', MAX(p.pub_name) AS 'Publisher Name', 
+COUNT(*) AS 'Number of book published' 
+    FROM publisher p
+    INNER JOIN book b ON p.pub_name = b.book_publisher
+    GROUP BY p.pub_name
+    
+#Find the total number of book for each category. Show category id, category name, and number of book for each category.
+
+SELECT MAX(genre_id) AS 'Genre ID', MAX(genre_name) AS 'Genre Name',
+COUNT(*) AS 'Number of book for each category'
+    FROM book
+    INNER JOIN genre ON genre_name = book_genre
+    GROUP BY genre_name
+
+#From the book table, list the books where quantity is more than the average quantity of all books. 
+
+SELECT MAX(genre_id) AS 'Genre ID', MAX(genre_name) AS 'Genre Name', 
+COUNT(*) AS 'Number of book for each category'
+    FROM book
+    INNER JOIN genre ON genre_name = book_genre
+    GROUP BY genre_name
+
+#Find the total number of books ordered by store manager from various publishers.
+
+SELECT MAX(p.pub_id) AS 'Publisher ID', MAX(p.pub_name) AS 'Publisher Name',
+SUM(ob.ob_quantity) AS 'Total number of books ordered' 
+    FROM order_book ob 
+    INNER JOIN publisher p ON ob.pub_id = p.pub_id
+    GROUP BY ob.pub_id
+
+#Produce a record of invoices for various publishers. The invoice consists of invoice number, invoice date, publisher’s names & addresses, total quantity of ordered books and total amount to be paid.
+
+SELECT i.inv_id AS 'Invoice Number', i.inv_date AS 'Invoice Date', 
+p.pub_name AS 'Publisher Name',p.pub_street AS 'Address(Street)',
+p.pub_city AS 'Address(City)', p.pub_country AS 'Address(Country)',
+i.inv_quantity AS 'Total quantity of ordered books', 
+i.inv_payment_amount AS 'Total amount to be paid' FROM invoice i
+    INNER JOIN publisher p ON i.pub_id = p.pub_id
+
+#A list of total customers based on gender who are registered as members in APU E-Bookstore. The list should show total number of registered members and total number of gender (male and female).
+
+SELECT SUM(CASE WHEN c.cus_gender = 'Male' THEN 1 ELSE NULL END) AS 'Total number of Male members',
+    SUM(CASE WHEN c.cus_gender = 'Female' THEN 1 ELSE NULL END) AS 'Total number of Female members',
+    COUNT(*) AS 'Total number of registered members'
+    FROM customer c
+
+#A list of purchased books that have been and have not been delivered to members. The list should show member identification number, address, contact number, book serial number, book title, quantity, date and status of delivery.
+
+SELECT c.cus_id AS 'Member ID', c.cus_f_name AS 'First Name', 
+c.cus_l_name AS 'Last Name', c.cus_street AS 'Address(Street)', 
+c.cus_city AS 'Address(City)', c.cus_country AS 'Address(Country)', c.cus_phone_no AS 'Phone Number', 
+    b.book_id AS 'Book ID', b.book_title AS 'Book Title', b.book_stock AS 'Quantity',
+    sc.sc_shipping_date AS 'Shipping Date', scb.scb_status AS 'Shipping Status'
+    FROM book b 
+    INNER JOIN shopping_cart_book scb ON b.book_id = scb.book_id
+    INNER JOIN shopping_cart sc ON  sc.sc_id = scb.sc_id
+    INNER JOIN customer c ON c.cus_id = sc.cus_id  
+
+#A list of total books and its total price as added by members in shopping cart.
+
+SELECT sc.sc_id AS 'Shopping Cart ID', MAX(c.cus_id) AS 'Customer ID' , SUM(b.book_price) AS 'Total price', COUNT(*) AS 'Total books'
+    FROM book b 
+    INNER JOIN shopping_cart_book scb ON b.book_id = scb.book_id
+    INNER JOIN shopping_cart sc ON  sc.sc_id = scb.sc_id
+    INNER JOIN customer c ON c.cus_id = sc.cus_id 
+    GROUP BY sc.sc_id 
+
+

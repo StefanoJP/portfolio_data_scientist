@@ -25,6 +25,6 @@
 <p>https://github.com/StefanoJP/portfolio_data_scientist/tree/main/Hote%20Price%20Prediction%20Model</p> 
 
 ### Tableau (Visualisation Analysis)
-<p>Flight Dalays Analysis by Tableau</p>
+<p>Flight Delays Analysis by Tableau</p>
 <p>Tableauによる視覚的分析（フライト遅延）</p>
 <p>https://github.com/StefanoJP/portfolio_data_scientist/tree/main/Tableau%20Flight%20Delays%20Analysis</p> 
